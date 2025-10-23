@@ -65,6 +65,7 @@ def folderCard(folder_name: str, total_files: int, on_change_folder, on_next):
 def processingCard(folder_name: str, processed: int, total: int, on_start=None, disabled=False):
     th = theme.get_theme()
     progress = processed / total if total > 0 else 0
+    
     card_content = [
         ft.Row([
             ft.Row([
@@ -73,10 +74,10 @@ def processingCard(folder_name: str, processed: int, total: int, on_start=None, 
             ], spacing=8),
             ft.Container(
                 content=ft.Text(f"{processed} de {total}", size=12, color=th["TEXT_SECONDARY"]),
-                #border=ft.border.all(1, th["PRIMARY_COLOR"]),
                 border_radius=8,
                 padding=4
-            )], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+            )
+        ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
         
         ft.Container(
             content=ft.Text(folder_name, weight=ft.FontWeight.W_500, size=14, color=th["TEXT"]),
@@ -91,9 +92,9 @@ def processingCard(folder_name: str, processed: int, total: int, on_start=None, 
                 value=progress,
                 height=12,
                 border_radius=3,
-                bgcolor=th["CARD"],
+                bgcolor=th["BACKGROUNDSCREEN"],
                 color=th["PRIMARY_COLOR"],
-                width=520
+                width=480
             ),
         ], alignment=ft.MainAxisAlignment.CENTER),
         ft.Row([
@@ -102,26 +103,37 @@ def processingCard(folder_name: str, processed: int, total: int, on_start=None, 
                 ft.Text("Processados", size=12, color=th["TEXT_SECONDARY"])
             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=1),
             ft.Column([
-                ft.Text(str(processed), size=24, weight=ft.FontWeight.W_600, color=th["PRIMARY_COLOR"]),
-                ft.Text("Válidos", size=12, color=th["TEXT_SECONDARY"])
+                ft.Text(str(total - processed), size=24, weight=ft.FontWeight.W_600, color=ft.Colors.GREY_600),
+                ft.Text("Restantes", size=12, color=th["TEXT_SECONDARY"])
             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=1)
         ], alignment=ft.MainAxisAlignment.CENTER, spacing=6)
     ]
-    if on_start:
+    
+    # Mostra o botão apenas se on_start for fornecido e não estiver desabilitado
+    if on_start and not disabled:
         card_content.append(ft.Container(height=4))
         card_content.append(
             ft.Row([
                 ft.ElevatedButton(
                     "Iniciar Processamento",
-                    icon=ft.Icons.FILE_DOWNLOAD_ROUNDED,
+                    icon=ft.Icons.PLAY_ARROW,
                     on_click=on_start,
                     bgcolor=th["PRIMARY_COLOR"],
                     color=th["ON_PRIMARY"],
                     height=38,
-                    disabled=disabled
                 )
             ], alignment=ft.MainAxisAlignment.CENTER)
         )
+    elif disabled:
+        # Mostra spinner quando está processando
+        card_content.append(ft.Container(height=4))
+        card_content.append(
+            ft.Row([
+                ft.ProgressRing(width=20, height=20, stroke_width=2),
+                ft.Text("Processando...", size=14, color=th["TEXT_SECONDARY"])
+            ], alignment=ft.MainAxisAlignment.CENTER, spacing=8)
+        )
+    
     return ft.Column(card_content, spacing=12)
 
 def completedCard(total_files: int, validos: int, cancelados: int, erros: int, lista_erros: list, on_download, on_new_folder, lista_cancelados: list = None):

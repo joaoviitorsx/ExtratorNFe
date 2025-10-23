@@ -9,7 +9,11 @@ class ExtratorController:
 
     def processarPasta(self, pasta_xml: str, progresso_callback=None) -> dict:
         try:
-            self._resultado_processado = self.extrator_service.processarPasta(pasta_xml)
+            # Passa o callback para o service
+            self._resultado_processado = self.extrator_service.processarPasta(
+                pasta_xml, 
+                progresso_callback=progresso_callback
+            )
 
             total_arquivos = (
                 len(self._resultado_processado.get("validas", [])) +

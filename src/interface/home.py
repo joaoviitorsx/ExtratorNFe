@@ -31,7 +31,8 @@ def HomePage(page: ft.Page):
         "cancelados": 0,
         "erros": 0,
         "lista_erros": [],
-        "lista_cancelados": []
+        "lista_cancelados": [],
+        "processing": False
     }
 
     pasta_picker = ft.FilePicker()
@@ -78,12 +79,14 @@ def HomePage(page: ft.Page):
 
     def gotoProcessing():
         state["status"] = ProcessingState.PROCESSING
+        state["processing"] = False
+        state["processed_files"] = 0
         render()
 
     def viewProcessing():
-        progresso = 0
-        if state["total_files"] > 0:
-            progresso = state["processed_files"] / state["total_files"]
+        # Mostra o botão apenas se NÃO estiver processando
+        show_button = not state["processing"]
+        
         return ft.Column([
             sectionHeader(),
             mainCard([
@@ -91,15 +94,8 @@ def HomePage(page: ft.Page):
                     state['folder_name'],
                     state['processed_files'],
                     state['total_files'],
-                    on_start=lambda e: iniciarProcessamento(),
-                    disabled=state.get("processing", False)
-                ),
-                ft.Container(height=16),
-                ft.ProgressBar(
-                    value=progresso,
-                    width=400,
-                    color=th["PRIMARY_COLOR"],
-                    bgcolor=ft.Colors.GREY_200
+                    on_start=lambda e: iniciarProcessamento() if show_button else None,
+                    disabled=state["processing"]
                 )
             ]),
             footer()
@@ -139,8 +135,8 @@ def HomePage(page: ft.Page):
             render()
 
     def iniciarProcessamento():
-        state["status"] = ProcessingState.PROCESSING
-        state["processing"] = True  # novo campo
+        # Marca como processando e atualiza UI imediatamente
+        state["processing"] = True
         state["processed_files"] = 0
         render()
 
@@ -150,12 +146,14 @@ def HomePage(page: ft.Page):
             render()
 
         def processar():
+            time.sleep(0.1)
+            
             resultado = controller.processarPasta(
                 state["folder_path"],
                 progresso_callback=atualizarProgresso
             )
 
-            state["processing"] = False  # libera o botão ao terminar
+            state["processing"] = False
 
             if resultado["status"] == "sucesso":
                 notificacao(page, "Processamento concluído", resultado["mensagem"], tipo="sucesso")
