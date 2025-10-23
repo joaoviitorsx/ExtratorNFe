@@ -62,7 +62,7 @@ def folderCard(folder_name: str, total_files: int, on_change_folder, on_next):
         ], alignment=ft.MainAxisAlignment.CENTER)
     ], spacing=12)
 
-def processingCard(folder_name: str, processed: int, total: int, on_start=None):
+def processingCard(folder_name: str, processed: int, total: int, on_start=None, disabled=False):
     th = theme.get_theme()
     progress = processed / total if total > 0 else 0
     card_content = [
@@ -89,7 +89,7 @@ def processingCard(folder_name: str, processed: int, total: int, on_start=None):
         ft.Row([
             ft.ProgressBar(
                 value=progress,
-                height=8,
+                height=12,
                 border_radius=3,
                 bgcolor=th["CARD"],
                 color=th["PRIMARY_COLOR"],
@@ -118,6 +118,7 @@ def processingCard(folder_name: str, processed: int, total: int, on_start=None):
                     bgcolor=th["PRIMARY_COLOR"],
                     color=th["ON_PRIMARY"],
                     height=38,
+                    disabled=disabled
                 )
             ], alignment=ft.MainAxisAlignment.CENTER)
         )

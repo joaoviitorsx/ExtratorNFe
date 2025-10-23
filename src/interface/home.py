@@ -81,6 +81,9 @@ def HomePage(page: ft.Page):
         render()
 
     def viewProcessing():
+        progresso = 0
+        if state["total_files"] > 0:
+            progresso = state["processed_files"] / state["total_files"]
         return ft.Column([
             sectionHeader(),
             mainCard([
@@ -88,7 +91,15 @@ def HomePage(page: ft.Page):
                     state['folder_name'],
                     state['processed_files'],
                     state['total_files'],
-                    on_start=lambda e: iniciarProcessamento()
+                    on_start=lambda e: iniciarProcessamento(),
+                    disabled=state.get("processing", False)
+                ),
+                ft.Container(height=16),
+                ft.ProgressBar(
+                    value=progresso,
+                    width=400,
+                    color=th["PRIMARY_COLOR"],
+                    bgcolor=ft.Colors.GREY_200
                 )
             ]),
             footer()
@@ -117,10 +128,9 @@ def HomePage(page: ft.Page):
             state["folder_path"] = e.path
             state["folder_name"] = e.path.split("\\")[-1]
 
-            total_xml = len([
-                f for f in os.listdir(e.path)
-                if f.lower().endswith(".xml") and os.path.isfile(os.path.join(e.path, f))
-            ])
+            total_xml = 0
+            for root, _, files in os.walk(e.path):
+                total_xml += len([f for f in files if f.lower().endswith(".xml")])
 
             state["total_files"] = total_xml
             state["status"] = ProcessingState.FOLDER_SELECTED
@@ -130,6 +140,8 @@ def HomePage(page: ft.Page):
 
     def iniciarProcessamento():
         state["status"] = ProcessingState.PROCESSING
+        state["processing"] = True  # novo campo
+        state["processed_files"] = 0
         render()
 
         def atualizarProgresso(processados, total):
@@ -142,6 +154,8 @@ def HomePage(page: ft.Page):
                 state["folder_path"],
                 progresso_callback=atualizarProgresso
             )
+
+            state["processing"] = False  # libera o botão ao terminar
 
             if resultado["status"] == "sucesso":
                 notificacao(page, "Processamento concluído", resultado["mensagem"], tipo="sucesso")
@@ -217,7 +231,8 @@ def HomePage(page: ft.Page):
             "cancelados": 0,
             "erros": 0,
             "lista_erros": [],
-            "lista_cancelados": []
+            "lista_cancelados": [],
+            "processing": False
         })
         render()
 

@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
 
-@dataclass
+@dataclass(slots=True)
 class NFeItemModel:
     nItem: str
     cProd: str
@@ -26,8 +26,7 @@ class NFeItemModel:
     pis: Dict[str, Optional[str]] = field(default_factory=dict)
     cofins: Dict[str, Optional[str]] = field(default_factory=dict)
 
-
-@dataclass
+@dataclass(slots=True)
 class NFeModel:
     chave: str
     numero: str

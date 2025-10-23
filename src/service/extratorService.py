@@ -6,16 +6,19 @@ class ExtratorService:
     def __init__(self, max_workers: int = 8):
         self.max_workers = max_workers
 
-    def processarPasta(self, pasta_path: str):
+    def processarPasta(self, pasta_path: str, progresso_callback=None):
         notas_validas = []
         notas_canceladas = []
         arquivos_com_problema = []
 
-        arquivos_xml = [
-            os.path.join(pasta_path, f)
-            for f in os.listdir(pasta_path)
-            if os.path.isfile(os.path.join(pasta_path, f))
-        ]
+        arquivos_xml = []
+        for root, _, files in os.walk(pasta_path):
+            for f in files:
+                if f.lower().endswith(".xml"):
+                    arquivos_xml.append(os.path.join(root, f))
+
+        total_arquivos = len(arquivos_xml)
+        processados = 0
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             futures = {executor.submit(self.processamentoArquivos, arquivo): arquivo for arquivo in arquivos_xml}
@@ -36,6 +39,10 @@ class ExtratorService:
 
                 except Exception:
                     arquivos_com_problema.append((os.path.basename(arquivo), arquivo))
+
+                processados += 1
+                if progresso_callback:
+                    progresso_callback(processados, total_arquivos)
 
         return {
             "validas": notas_validas,

@@ -3,7 +3,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
 
 class ExportarService:
-    def __init__(self, batch_size: int = 500):
+    def __init__(self, batch_size: int = 5000):
         self.header_font = Font(bold=True, color="FFFFFF")
         self.header_fill = PatternFill("solid", fgColor="4F81BD")
         self.header_align = Alignment(horizontal="center")
